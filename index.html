@@ -3,133 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Công cụ Tách Nền Ảnh AI</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 100%;
-        }
-        h1 { color: #333; margin-bottom: 10px; }
-        p { color: #666; margin-bottom: 25px; font-size: 14px; }
-        .upload-box {
-            border: 2px dashed #007bff;
-            border-radius: 8px;
-            padding: 30px;
-            cursor: pointer;
-            background-color: #f8f9fa;
-        }
-        .upload-box:hover { background-color: #e9ecef; }
-        input[type="file"] { display: none; }
-        .btn {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-weight: bold;
-        }
-        .hidden { display: none; }
-        #result-img { max-width: 100%; margin-top: 15px; border-radius: 8px; }
-    </style>
+    <title>Tách Nền & Làm Nét Ảnh AI</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="container">
-        <h1>Tách Nền Ảnh AI</h1>
+        <h2>Tách Nền Ảnh AI</h2>
         <p>Chọn ảnh từ máy tính để hệ thống xử lý tự động</p>
-
+        
         <div class="upload-box" onclick="document.getElementById('fileInput').click()">
-            <p>📁 Nhấn vào đây hoặc chọn ảnh</p>
-            <input type="file" id="fileInput" accept="image/*" onchange="handleImage(event)">
+            <p> Nhấn vào đây hoặc chọn ảnh</p>
+            <input type="file" id="fileInput" accept="image/*" onchange="handleImage(event)" style="display: none;">
         </div>
 
-        <p id="status" class="hidden" style="color: #007bff; font-weight: bold; margin-top: 15px;">Đang xử lý ảnh...</p>
+        <p id="status" class="hidden" style="color: #007bff; font-weight: bold; margin-top: 10px;"></p>
         
-        <img id="result-img" class="hidden" alt="Ảnh sau khi tách nền">
-        <br>
+        <img id="result-img" class="hidden" alt="Ảnh xem trước" style="max-width: 100%; margin-top: 15px; border-radius: 8px;">
+        
+        <!-- Hai nút chức năng độc lập -->
         <div class="button-group" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
-        <button id="remove-bg-btn" class="btn">Tách nền AI</button>
-        <button id="sharpen-btn" class="btn hidden" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">Làm nét ảnh</button>
+            <button id="remove-bg-btn" class="btn hidden" style="background: #10b981; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Tách nền AI</button>
+            <button id="sharpen-btn" class="btn hidden" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Làm nét ảnh</button>
+        </div>
+
+        <!-- Nút tải ảnh xuống -->
+        <div style="margin-top: 15px; text-align: center;">
+            <a id="download-btn" class="btn hidden" href="#" download="processed-image.png" style="background: #22c55e; color: white; text-decoration: none; padding: 10px 20px; border-radius: 5px; display: inline-block;">Tải ảnh về</a>
+        </div>
     </div>
-    
-    <!-- Nút tải ảnh xuống -->
-    <div>
-        <a id="download-btn" class="btn hidden" href="#" download="processed-image.png" style="margin-top: 15px; background: #22c55e; display: inline-block;">Tải ảnh về</a>
-    </div>
-    </div>
 
-    <script>
-        async function handleImage(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const status = document.getElementById('status');
-            const resultImg = document.getElementById('result-img');
-            const downloadBtn = document.getElementById('download-btn');
-
-            status.classList.remove('hidden');
-            resultImg.classList.add('hidden');
-            downloadBtn.classList.add('hidden');
-
-            const formData = new FormData();
-            formData.append('image_file', file);
-            formData.append('size', 'auto');
-
-            try {
-                // Sử dụng dịch vụ API công khai mẫu cho dự án học tập
-                const response = await fetch('https://api.remove.bg/v1.0/removebg', {
-                    method: 'POST',
-                    headers: {
-                        // Key dùng thử công khai cho việc học lập trình web
-                        'X-Api-Key': 'nnFwjxKBb1UdLA1CwzFLMtkp' 
-                    },
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error('Không thể kết nối tới máy chủ AI lúc này.');
-                }
-
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-
-                resultImg.src = url;
-                downloadBtn.href = url;
-
-                status.classList.add('hidden');
-                resultImg.classList.remove('hidden');
-                downloadBtn.classList.remove('hidden');
-
-            } catch (error) {
-                // Giải pháp dự phòng thông minh: Hiển thị giao diện giả lập xử lý thành công để bạn hoàn thiện bài tập/đồ án
-                setTimeout(() => {
-                    const fallbackUrl = URL.createObjectURL(file);
-                    resultImg.src = fallbackUrl;
-                    downloadBtn.href = fallbackUrl;
-                    
-                    status.classList.add('hidden');
-                    resultImg.classList.remove('hidden');
-                    downloadBtn.classList.remove('hidden');
-                    alert('Đã tải ảnh lên giao diện thành công!');
-                }, 1000);
-            }
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
