@@ -63,7 +63,15 @@
         
         <img id="result-img" class="hidden" alt="Ảnh sau khi tách nền">
         <br>
-        <a id="download-btn" class="btn hidden" download="tach-nen.png">Tải ảnh về máy</a>
+        <div class="button-group" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+        <button id="remove-bg-btn" class="btn">Tách nền AI</button>
+        <button id="sharpen-btn" class="btn hidden" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">Làm nét ảnh</button>
+    </div>
+    
+    <!-- Nút tải ảnh xuống -->
+    <div>
+        <a id="download-btn" class="btn hidden" href="#" download="processed-image.png" style="margin-top: 15px; background: #22c55e; display: inline-block;">Tải ảnh về</a>
+    </div>
     </div>
 
     <script>
