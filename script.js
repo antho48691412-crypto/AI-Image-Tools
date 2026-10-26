@@ -1,4 +1,3 @@
-// Khai báo các phần tử giao diện
 const imageInput = document.getElementById('fileInput');
 const removeBgBtn = document.getElementById('remove-bg-btn');
 const sharpenBtn = document.getElementById('sharpen-btn');
@@ -6,40 +5,35 @@ const downloadBtn = document.getElementById('download-btn');
 const resultImg = document.getElementById('result-img');
 const statusText = document.getElementById('status');
 
-// Dán API Key Remove.bg của bạn vào trong cặp dấu ngoặc kép này
+// Dán API Key Remove.bg của bạn vào đây
 const API_KEY = "8JEqXTNbkBPKQRUtQCZErFao";
+let currentProcessedUrl = "";
 
-let currentProcessedUrl = ""; // Biến lưu trữ ảnh hiện tại để tải về hoặc làm nét
-
-// 1. Khi người dùng chọn ảnh mới từ máy tính
+// Khi chọn ảnh từ máy tính
 function handleImage(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // Hiển thị ảnh gốc xem trước lên thẻ img
     const localUrl = URL.createObjectURL(file);
     resultImg.src = localUrl;
     resultImg.classList.remove('hidden');
     currentProcessedUrl = localUrl;
 
-    // Hiện 2 nút chức năng, ẩn nút tải xuống lúc đầu
+    // HIỆN CẢ HAI NÚT CHỨC NĂNG NGAY KHI CHỌN ẢNH
     removeBgBtn.classList.remove('hidden');
     sharpenBtn.classList.remove('hidden');
     downloadBtn.classList.add('hidden');
     
     if (statusText) {
-        statusText.innerText = "Đã chọn ảnh thành công. Chọn chức năng bên dưới:";
+        statusText.innerText = "Đã chọn ảnh thành công. Hãy chọn chức năng bên dưới:";
         statusText.classList.remove('hidden');
     }
 }
 
-// 2. Chức năng: Tách nền AI (Remove.bg)
+// 1. Chức năng Tách nền AI
 removeBgBtn.addEventListener('click', async () => {
     const file = imageInput.files[0];
-    if (!file) {
-        alert("Vui lòng chọn một tấm ảnh trước!");
-        return;
-    }
+    if (!file) return;
 
     if (statusText) statusText.innerText = "Đang tách nền AI, vui lòng đợi...";
 
@@ -57,38 +51,31 @@ removeBgBtn.addEventListener('click', async () => {
         if (response.ok) {
             const blob = await response.blob();
             currentProcessedUrl = URL.createObjectURL(blob);
-            
             resultImg.src = currentProcessedUrl;
             downloadBtn.href = currentProcessedUrl;
             downloadBtn.classList.remove('hidden');
             if (statusText) statusText.innerText = "Tách nền thành công!";
         } else {
-            alert("Lỗi khi tách nền! Hãy kiểm tra lại API Key Remove.bg.");
-            if (statusText) statusText.innerText = "";
+            alert("Lỗi khi tách nền! Hãy kiểm tra lại API Key.");
         }
     } catch (error) {
         console.error(error);
-        alert("Có lỗi xảy ra khi kết nối tới máy chủ.");
-        if (statusText) statusText.innerText = "";
+        alert("Lỗi kết nối máy chủ.");
     }
 });
 
-// 3. Chức năng: Làm nét ảnh trực tiếp (Canvas Sharpen)
+// 2. Chức năng Làm nét ảnh trực tiếp
 sharpenBtn.addEventListener('click', () => {
-    if (!resultImg.src) {
-        alert("Vui lòng chọn ảnh trước!");
-        return;
-    }
+    if (!resultImg.src) return;
 
     if (statusText) statusText.innerText = "Đang làm nét ảnh...";
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     const img = new Image();
-    
     img.crossOrigin = "anonymous";
-    img.src = resultImg.src; // Lấy ảnh hiện tại trên màn hình để làm nét
-    
+    img.src = resultImg.src;
+
     img.onload = () => {
         canvas.width = img.width;
         canvas.height = img.height;
@@ -99,7 +86,6 @@ sharpenBtn.addEventListener('click', () => {
         const w = canvas.width;
         const h = canvas.height;
         
-        // Ma trận thuật toán làm nét ảnh
         const weights = [
              0, -1,  0,
             -1,  5, -1,
@@ -129,15 +115,13 @@ sharpenBtn.addEventListener('click', () => {
                 dst[idx]     = Math.min(Math.max(r, 0), 255);
                 dst[idx + 1] = Math.min(Math.max(g, 0), 255);
                 dst[idx + 2] = Math.min(Math.max(b, 0), 255);
-                dst[idx + 3] = data[idx + 3]; // Giữ nguyên độ trong suốt (alpha)
+                dst[idx + 3] = data[idx + 3];
             }
         }
 
         ctx.putImageData(outputData, 0, 0);
-        
         currentProcessedUrl = canvas.toDataURL('image/png');
         resultImg.src = currentProcessedUrl;
-        
         downloadBtn.href = currentProcessedUrl;
         downloadBtn.classList.remove('hidden');
         if (statusText) statusText.innerText = "Làm nét ảnh thành công!";
